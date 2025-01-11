@@ -2,6 +2,10 @@
 
 A modern streaming platform built with SvelteKit that offers a seamless experience for watching embedded content. Features a rich user interface, comprehensive media management, and social features.
 
+![screenshot1](./screenshots/screenshot1.png)
+![screenshot2](./screenshots/screenshot2.png)
+![screenshot3](./screenshots/screenshot3.png)
+
 ## Features
 
 ### Media & Streaming
