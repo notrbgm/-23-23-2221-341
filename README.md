@@ -59,6 +59,8 @@ npm install
 
 ### 2. Set Up MySQL
 
+(Setting up a database is not necessary if you only want to launch streamium locally and watch content)
+
 1. Install MySQL if not already installed:
 ```bash
 # Ubuntu/Debian
