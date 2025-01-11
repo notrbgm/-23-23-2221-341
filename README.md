@@ -12,8 +12,6 @@ A modern streaming platform built with SvelteKit that offers a seamless experien
 - TMDB API integration for extensive movie and TV show data
 - Multiple provider support (VidSrc, VidSrc Pro, Embed.su)
 - Advanced search with genre, year, and rating filters
-- Automatic playback progress tracking
-- Continue watching and next episode auto-play
 
 ### User Experience
 - User authentication
@@ -39,7 +37,6 @@ A modern streaming platform built with SvelteKit that offers a seamless experien
 - Prisma ORM with MySQL
 - JWT Authentication
 - Sharp for image optimization
-- TMDB API integration
 
 ## Project Structure
 ```
