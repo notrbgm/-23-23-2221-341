@@ -56,6 +56,102 @@ You can run this project either using Docker (recommended) or manual setup.
 
 ### Docker Setup (Recommended)
 
+#### Windows Setup
+
+1. Install WSL2:
+   ```powershell
+   # Run in PowerShell as Administrator
+   wsl --install
+   ```
+   - Restart your computer when prompted
+   - After restart, a Ubuntu terminal will open to set up your Ubuntu username and password
+   - If it doesn't open automatically, search for "Ubuntu" in the Start menu
+
+2. Install Docker in WSL2 (Recommended):
+   ```bash
+   # Update package list and install prerequisites
+   sudo apt update
+   sudo apt install -y ca-certificates curl gnupg lsb-release
+
+   # Add Docker's official GPG key
+   sudo mkdir -m 0755 -p /etc/apt/keyrings
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+   # Add Docker repository
+   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+   # Install Docker
+   sudo apt update
+   sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+   # Add your user to docker group (to run docker without sudo)
+   sudo usermod -aG docker $USER
+
+   # Apply group changes (alternatively, you can log out and back in)
+   newgrp docker
+   ```
+
+   Alternative: If you prefer a GUI, you can install Docker Desktop:
+   - Download [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
+   - Run the installer (keep all default options)
+   - In Docker Desktop settings, enable WSL2 integration
+
+3. Set up Git (in Ubuntu terminal):
+   ```bash
+   git config --global core.autocrlf false
+   git config --global user.name "Your Name"
+   git config --global user.email "your.email@example.com"
+   ```
+
+4. Clone and Set up the Project:
+   ```bash
+   # Go to your home directory in WSL
+   cd ~
+
+   # Clone the repository
+   git clone https://github.com/gmonarque/streamium.git
+   cd streamium
+
+   # Copy environment file
+   cp .env.example .env
+   ```
+
+5. Configure Environment:
+   - Get your TMDB API key from https://www.themoviedb.org/settings/api
+   - Open .env in a text editor:
+   ```bash
+   nano .env
+   ```
+   - Update the TMDB_API_KEY value
+   - Save the file (Ctrl+X, then Y, then Enter)
+
+6. Start the Application:
+   ```bash
+   # Build and start containers
+   docker compose up -d
+
+   # Wait about 30 seconds for MySQL to initialize, then run:
+   docker compose exec web npx prisma migrate dev
+   ```
+
+7. Access the Application:
+   - Open http://localhost:5173 in your browser
+   - The application should now be running
+
+8. Useful Commands:
+   ```bash
+   # View logs
+   docker compose logs -f
+
+   # Stop the application
+   docker compose down
+
+   # Completely reset (including database)
+   docker compose down -v
+   ```
+
+#### Linux/macOS Setup
+
 1. Install Docker and Docker Compose on your system
 
 2. Copy the example environment file:
@@ -212,6 +308,50 @@ npm run dev
 The application will be available at `http://localhost:5173`
 
 ### Troubleshooting
+
+#### Windows-specific Issues
+
+1. If Docker commands fail with "permission denied":
+   - Check that you're using WSL2 (not WSL1):
+   ```bash
+   wsl --status
+   ```
+   - Verify Docker service is running:
+   ```bash
+   sudo service docker status
+   # If not running, start it:
+   sudo service docker start
+   ```
+   - Ensure your user is in the docker group:
+   ```bash
+   groups
+   # If docker group is missing:
+   sudo usermod -aG docker $USER
+   newgrp docker
+   ```
+
+2. If you experience slow performance:
+   - Store the project in WSL filesystem instead of Windows filesystem
+   - Avoid running Docker commands from Windows CMD/PowerShell
+   - Use WSL terminal for all Docker operations
+
+3. If port conflicts occur:
+   - Check if Windows services are using the ports:
+   ```powershell
+   # Run in PowerShell as Administrator
+   netstat -ano | findstr "3306"
+   netstat -ano | findstr "5173"
+   ```
+   - Stop conflicting services or change ports in docker-compose.yml
+
+4. If line endings cause issues:
+   - Configure Git to use LF instead of CRLF:
+   ```bash
+   git config --global core.autocrlf false
+   ```
+   - Re-clone the repository if needed
+
+#### General Issues
 
 1. If you get MySQL connection errors:
    - Verify MySQL is running: `sudo systemctl status mysql`
