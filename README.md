@@ -52,7 +52,69 @@ streamium/
 
 ## Getting Started
 
-### 1. Install Dependencies
+You can run this project either using Docker (recommended) or manual setup.
+
+### Docker Setup (Recommended)
+
+1. Install Docker and Docker Compose on your system
+
+2. Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+3. Update the .env file with your TMDB API key (get from https://www.themoviedb.org/settings/api)
+
+4. Build and start the containers:
+```bash
+docker compose build
+docker compose up (-d for detached)
+```
+
+5. Wait for the services to fully start (you should see "ready for connections" in the MySQL logs), then in a new terminal, run the database migrations:
+```bash
+docker compose exec web npx prisma migrate dev
+```
+
+The application will be available at `http://localhost:5173`
+
+Note: If you encounter any migration issues:
+1. Clean up the environment completely:
+```bash
+# Stop and remove containers, volumes, and networks
+docker compose down -v
+# Remove any Docker volumes that might persist
+docker volume rm streamium_mysql_data
+```
+
+2. Start the services again:
+```bash
+docker compose up
+```
+
+3. Wait for MySQL to initialize (you should see "MySQL Server - ready for connections" in the logs), then run migrations:
+```bash
+docker compose exec web npx prisma migrate dev
+```
+
+If you still encounter issues, you can check the MySQL logs:
+```bash
+docker compose logs db
+```
+
+To stop the services:
+```bash
+docker compose down
+```
+
+To completely reset (including database):
+```bash
+docker compose down -v
+```
+
+### Manual Setup
+
+#### 1. Install Dependencies
 ```bash
 npm install
 ```
