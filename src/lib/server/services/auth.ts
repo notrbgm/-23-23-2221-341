@@ -1,5 +1,5 @@
 import { JWT_SECRET } from "$env/static/private";
-import * as jwt from "jsonwebtoken";
+import jsonwebtoken from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { prisma } from "$lib/server/prisma";
 import type {
@@ -46,12 +46,12 @@ class AuthService implements AuthServiceInterface {
       isAdmin: user.isAdmin,
     };
 
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+    return jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: "7d" });
   }
 
   async verifyToken(token: string): Promise<TokenPayload> {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+      const decoded = jsonwebtoken.verify(token, JWT_SECRET) as TokenPayload;
       return decoded;
     } catch (error) {
       throw new Error("Invalid token");
@@ -65,13 +65,21 @@ class AuthService implements AuthServiceInterface {
   ): Promise<UserSession> {
     const hashedPassword = await this.hashPassword(password);
 
-    const result = await prisma.$queryRaw`
-      INSERT INTO users (username, email, "passwordHash", "isAdmin", "createdAt", "updatedAt")
-      VALUES (${username}, ${email}, ${hashedPassword}, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      RETURNING id, username, email, "isAdmin"
-    `;
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email,
+        passwordHash: hashedPassword,
+        isAdmin: false,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        isAdmin: true,
+      },
+    });
 
-    const user = Array.isArray(result) ? result[0] : result;
     return toUserSession(user);
   }
 
@@ -127,7 +135,7 @@ class AuthService implements AuthServiceInterface {
     const user = await this.findUserByIdentifier(identifier);
     if (!user) return null;
 
-    const resetToken = jwt.sign({ userId: user.id }, JWT_SECRET, {
+    const resetToken = jsonwebtoken.sign({ userId: user.id }, JWT_SECRET, {
       expiresIn: "1h",
     });
     const resetTokenExp = new Date(Date.now() + 60 * 60 * 1000);
@@ -145,7 +153,7 @@ class AuthService implements AuthServiceInterface {
 
   async validateResetToken(token: string): Promise<number | null> {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+      const decoded = jsonwebtoken.verify(token, JWT_SECRET) as { userId: number };
 
       const user = await prisma.user.findFirst({
         where: {
